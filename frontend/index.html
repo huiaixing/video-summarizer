@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B 站视频总结器 🎬</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #FF6B9D;
+            --primary-blue: #4ECDC4;
+            --soft-pink: #FFE5EC;
+            --soft-blue: #E0F7FA;
+            --warm-yellow: #FFD93D;
+            --text-dark: #2D3436;
+            --text-light: #636E72;
+            --white: #FFFFFF;
+            --shadow-soft: 0 8px 32px rgba(255, 107, 157, 0.15);
+            --shadow-hover: 0 12px 48px rgba(255, 107, 157, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #FFE5EC 0%, #E0F7FA 50%, #FFF5E6 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 217, 61, 0.08) 0%, transparent 40%);
+            animation: float 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 20px) rotate(-5deg); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            color: var(--primary-pink);
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 3em;
+            text-shadow: 3px 3px 0px rgba(255, 107, 157, 0.2);
+            animation: bounce 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1::after {
+            content: '✨';
+            position: absolute;
+            right: -60px;
+            top: 0;
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            50% { opacity: 0.8; transform: scale(1.2) rotate(180deg); }
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 24px;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-pink), var(--primary-blue), var(--warm-yellow));
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-4px);
+        }
+
+        .input-group {
+            margin-bottom: 28px;
+            position: relative;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.1em;
+        }
+
+        label::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--primary-pink);
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 18px 20px;
+            border: 3px solid #F0F0F0;
+            border-radius: 16px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #FAFAFA;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-pink);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.1);
+            transform: translateY(-2px);
+        }
+
+        input[type="text"]::placeholder,
+        input[type="password"]::placeholder {
+            color: #B0B0B0;
+        }
+
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FF6B9D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+            appearance: none;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px 20px;
+            background: var(--soft-pink);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-group:hover {
+            background: #FFD9E4;
+            transform: translateX(4px);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: var(--primary-pink);
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .checkbox-group label::before {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-pink) 0%, #FF8FAB 100%);
+            color: var(--white);
+            border: none;
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: inherit;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(255, 107, 157, 0.3);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(255, 107, 157, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 18px 24px;
+            border-radius: 16px;
+            margin-top: 20px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+            border-left: 5px solid;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status.info {
+            background: var(--soft-blue);
+            color: #00838F;
+            border-color: var(--primary-blue);
+        }
+
+        .status.success {
+            background: #E8F5E9;
+            color: #2E7D32;
+            border-color: #4CAF50;
+        }
+
+        .status.error {
+            background: #FFE5EC;
+            color: #C62828;
+            border-color: var(--primary-pink);
+        }
+
+        .status.warning {
+            background: #FFF3E0;
+            color: #F57C00;
+            border-color: var(--warm-yellow);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+
+        .spinner {
+            width: 100%;
+            height: 100%;
+            border: 5px solid #F0F0F0;
+            border-top-color: var(--primary-pink);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .spinner::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 5px solid transparent;
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 2s linear infinite reverse;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #loadingText {
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .output-section {
+            display: none;
+        }
+
+        .output-section.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .output-header h2 {
+            color: var(--text-dark);
+            font-size: 1.6em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .output-header h2::before {
+            content: '📝';
+            margin-right: 10px;
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            75% { transform: rotate(-20deg); }
+        }
+
+        .btn-copy, .btn-download {
+            background: linear-gradient(135deg, var(--soft-pink), var(--soft-blue));
+            color: var(--text-dark);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-copy:hover, .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .whisper-options {
+            display: none;
+            margin-top: 20px;
+            padding: 24px;
+            background: var(--soft-blue);
+            border-radius: 16px;
+            border: 2px dashed var(--primary-blue);
+        }
+
+        .whisper-options.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); max-height: 0; }
+            to { opacity: 1; transform: translateY(0); max-height: 500px; }
+        }
+
+        .info-box {
+            background: var(--white);
+            border-left: 5px solid var(--primary-blue);
+            padding: 16px 20px;
+            margin-top: 16px;
+            border-radius: 0 12px 12px 0;
+            font-size: 14px;
+            color: var(--text-light);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .info-box strong {
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-box strong::before {
+            content: '💡';
+        }
+
+        .api-key-hint {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-top: 8px;
+            background: var(--soft-blue);
+            padding: 12px 16px;
+            border-radius: 10px;
+        }
+
+        .api-key-hint a {
+            color: var(--primary-blue);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .api-key-hint a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-output {
+            background: #FAFAFA;
+            border: 3px solid #F0F0F0;
+            border-radius: 16px;
+            padding: 30px;
+            min-height: 400px;
+            line-height: 1.8;
+            color: var(--text-dark);
+        }
+
+        .markdown-output h1,
+        .markdown-output h2,
+        .markdown-output h3 {
+            color: var(--primary-pink);
+            margin: 24px 0 16px;
+            font-weight: 700;
+        }
+
+        .markdown-output h1 { font-size: 1.8em; border-bottom: 3px solid var(--soft-pink); padding-bottom: 10px; }
+        .markdown-output h2 { font-size: 1.5em; }
+        .markdown-output h3 { font-size: 1.3em; }
+
+        .markdown-output p {
+            margin: 16px 0;
+            text-align: justify;
+        }
+
+        .markdown-output ul,
+        .markdown-output ol {
+            margin: 16px 0;
+            padding-left: 30px;
+        }
+
+        .markdown-output li {
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .markdown-output ul li::before {
+            content: '🎯';
+            position: absolute;
+            left: -25px;
+        }
+
+        .markdown-output ol {
+            counter-reset: item;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .markdown-output ol li {
+            counter-increment: item;
+            padding-left: 35px;
+        }
+
+        .markdown-output ol li::before {
+            content: counter(item);
+            position: absolute;
+            left: 0;
+            background: var(--primary-blue);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .markdown-output blockquote {
+            border-left: 5px solid var(--primary-blue);
+            background: var(--soft-blue);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        .markdown-output code {
+            background: var(--soft-pink);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+            color: #C62828;
+        }
+
+        .markdown-output pre {
+            background: #2D3436;
+            color: #FAB1A0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .markdown-output pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .markdown-output strong {
+            color: var(--primary-pink);
+            font-weight: 700;
+        }
+
+        .markdown-output em {
+            color: var(--primary-blue);
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2em; }
+            .card { padding: 24px; }
+            .output-header { flex-direction: column; align-items: stretch; }
+            .btn-copy, .btn-download { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 B 站视频总结器</h1>
+        <p class="subtitle">输入视频链接，自动生成结构化学习笔记 ✨</p>
+
+        <div class="card">
+            <div class="input-group">
+                <label for="videoUrl">📺 B 站视频链接</label>
+                <input 
+                    type="text" 
+                    id="videoUrl" 
+                    placeholder="例如：https://www.bilibili.com/video/BV1xx411c7mD"
+                >
+            </div>
+
+            <div class="checkbox-group" onclick="toggleWhisperOptions()">
+                <input type="checkbox" id="useWhisper" checked onchange="toggleWhisperOptions()">
+                <label for="useWhisper">启用 Whisper 语音识别（无字幕时自动使用）🎤</label>
+            </div>
+
+            <div class="whisper-options" id="whisperOptions">
+                <label for="whisperModel">🎛️ Whisper 模型选择</label>
+                <select id="whisperModel">
+                    <option value="tiny">⚡ Tiny (最快，约 1 分钟/10 分钟视频，精度一般)</option>
+                    <option value="base">🏃 Base (较快，约 3 分钟/10 分钟视频，精度不错)</option>
+                    <option value="small">🚶 Small (中等，约 5 分钟/10 分钟视频，精度好)</option>
+                    <option value="medium">🐢 Medium (较慢，约 10 分钟/10 分钟视频，精度高)</option>
+                    <option value="large">👑 Large (最慢，精度最高，需要较多内存)</option>
+                </select>
+                <div class="info-box">
+                    <strong>提示：</strong> 视频有 CC 字幕时会直接用字幕（几秒钟）。<br>
+                    没有字幕时才会用 Whisper 转写（需要下载音频，速度取决于模型大小）。
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 20px;">
+                <label for="apiKey">🔑 API Key（可选）</label>
+                <input 
+                    type="password" 
+                    id="apiKey" 
+                    placeholder="留空则使用环境变量 DASHSCOPE_API_KEY"
+                >
+                <p class="api-key-hint">
+                    💡 使用阿里百炼 Qwen 模型，获取 Key: 
+                    <a href="https://dashscope.console.aliyun.com/" target="_blank">dashscope.console.aliyun.com</a>
+                </p>
+            </div>
+
+            <button class="btn" id="summarizeBtn" onclick="summarize()">
+                🚀 开始总结
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner-container">
+                    <div class="spinner"></div>
+                </div>
+                <p id="loadingText">正在处理中...</p>
+            </div>
+
+            <div class="status" id="status"></div>
+        </div>
+
+        <div class="card output-section" id="outputSection">
+            <div class="output-header">
+                <h2>学习笔记</h2>
+                <div>
+                    <button class="btn-copy" onclick="copyToClipboard()">📋 复制</button>
+                    <button class="btn-download" onclick="downloadMarkdown()">💾 下载</button>
+                </div>
+            </div>
+            <div id="output" class="markdown-output"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSummary = '';
+        let currentTitle = '';
+
+        function toggleWhisperOptions() {
+            const checkbox = document.getElementById('useWhisper');
+            const options = document.getElementById('whisperOptions');
+            options.classList.toggle('active', checkbox.checked);
+        }
+
+        toggleWhisperOptions();
+
+        function renderMarkdown(markdown) {
+            let html = markdown;
+            
+            html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+            
+            html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            html = html.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
+            
+            html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+            
+            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+            
+            html = html.replace(/^\s*[-*+]\s+(.*$)/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+            
+            html = html.replace(/^\s*\d+\.\s+(.*$)/gm, '<li>$1</li>');
+            
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = '<p>' + html + '</p>';
+            
+            html = html.replace(/<p>\s*(<h[1-3]>)/g, '$1');
+            html = html.replace(/(<\/h[1-3]>)\s*<\/p>/g, '$1');
+            html = html.replace(/<p>\s*(<ul>)/g, '$1');
+            html = html.replace(/(<\/ul>)\s*<\/p>/g, '$1');
+            html = html.replace(/<p>\s*(<ol>)/g, '$1');
+            html = html.replace(/(<\/ol>)\s*<\/p>/g, '$1');
+            html = html.replace(/<p>\s*(<blockquote>)/g, '$1');
+            html = html.replace(/(<\/blockquote>)\s*<\/p>/g, '$1');
+            html = html.replace(/<p>\s*(<pre>)/g, '$1');
+            html = html.replace(/(<\/pre>)\s*<\/p>/g, '$1');
+            html = html.replace(/<p><\/p>/g, '');
+            
+            return html;
+        }
+
+        async function summarize() {
+            const url = document.getElementById('videoUrl').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const useWhisper = document.getElementById('useWhisper').checked;
+            const whisperModel = document.getElementById('whisperModel').value;
+            const btn = document.getElementById('summarizeBtn');
+            const loading = document.getElementById('loading');
+            const loadingText = document.getElementById('loadingText');
+            const status = document.getElementById('status');
+            const outputSection = document.getElementById('outputSection');
+            const output = document.getElementById('output');
+
+            if (!url) {
+                showStatus('❌ 请输入视频链接', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            loading.classList.add('active');
+            status.style.display = 'none';
+            outputSection.classList.remove('active');
+            currentSummary = '';
+            currentTitle = '';
+
+            try {
+                if (useWhisper) {
+                    loadingText.textContent = '📋 正在检查字幕...（无字幕将使用 Whisper）';
+                } else {
+                    loadingText.textContent = '📋 正在提取字幕...';
+                }
+                
+                const response = await fetch('/api/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        url: url,
+                        api_key: apiKey || undefined,
+                        use_whisper: useWhisper,
+                        whisper_model: whisperModel
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    loadingText.textContent = '🤖 正在生成总结...';
+                    
+                    currentTitle = data.title;
+                    currentSummary = data.summary;
+                    
+                    output.innerHTML = renderMarkdown(data.summary);
+                    
+                    showStatus(`✅ ${data.message}`, 'success');
+                    outputSection.classList.add('active');
+                    
+                    setTimeout(() => {
+                        outputSection.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                } else {
+                    showStatus(data.message || '❌ 处理失败', 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ 请求失败：${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                loading.classList.remove('active');
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output');
+            const range = document.createRange();
+            range.selectNode(output);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            
+            const btn = document.querySelector('.btn-copy');
+            const originalText = btn.textContent;
+            btn.textContent = '✅ 已复制!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        function downloadMarkdown() {
+            const blob = new Blob([currentSummary], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentTitle || '视频笔记'}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        document.getElementById('videoUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                summarize();
+            }
+        });
+    </script>
+</body>
+</html>
