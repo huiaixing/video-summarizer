@@ -80,4 +80,4 @@ bilibili-summarizer/
 
 ---
 
-Made with 🎭 by 小 D
+Made with 🎭 by huiaixing
